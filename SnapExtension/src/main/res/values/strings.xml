@@ -1,0 +1,7 @@
+<resources>
+    <string name="app_name">DashClock Snapchat Extension</string>
+    <string name="short_name">Snapchat Updates</string>
+    <string name="action_settings">Settings</string>
+    <string name="extension_description">Displays the number of unseen snaps</string>
+    <string name="accessibility_service_description">This app does not store any of your information, nor transmit it anywhere. It only needs this accessibility as a work around since there is no API for snapchat yet. This app will be updated once the snapchat API is released to remove this sometimes harmful option. Source code is available at github.com/chrisarevir/SnapExt</string>
+</resources>
