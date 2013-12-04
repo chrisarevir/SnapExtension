@@ -16,39 +16,50 @@ public class SnapNotificationService extends AccessibilityService{
      */
     @Override
     public void onAccessibilityEvent(AccessibilityEvent event) {
+        if(event.getEventType() == AccessibilityEvent.TYPE_NOTIFICATION_STATE_CHANGED){
+            System.out.println("Notification event state changed");
 
-        notifText = extractor((Notification) event.getParcelableData());
-        String names = "";
-        int count = 0;
+            // Get all the pertinent information from notification
+            notifText = extractor((Notification) event.getParcelableData());
+            String names = "";
+            int count = 0;
 
-        String[] test = notifText.get(0).split(" ");
-        if(test[0].matches("^[0-9]*$")){
-            count = Integer.parseInt(test[0]);
-            System.out.println("Multiple Notifications: " + test[0]);
-            for(int i = 1; i < notifText.size(); i++){
-                names += notifText.get(i);
+            // Had to include this check because the widget would crash when either the
+            // feed was cleared or when a Story was deleted
+            if(notifText == null){
+                MessageManager manager = MessageManager.getInstance();
+                if (manager != null) {
+                    if (manager.getReceiver()!=null){
+                        manager.notifyListener(0, names);
+                    }
+                }
+                return;
             }
-            System.out.println(names);
-        }
-        else{
-            count = 1;
-            test = notifText.get(1).split(" ");
-            for(int i = 3; i < test.length; i++){
-                names += test[i] + " ";
-            }
-            System.out.println("Just the one from: " + names);
-        }
-        // [Snapchat, New Snap from Ashley Raynera Medina!]
-        // [3 new Snaps!, Brittany Peacock, anapa_chris]
-        System.out.println(notifText);
 
-        MessageManager manager = MessageManager.getInstance();
-        if (manager != null) {
-            if (manager.getReceiver()!=null){
-                manager.notifyListener(names);
+            // Format for extraction output is as follows
+            // [Snapchat, New Snap from USER NAME!]
+            // [Z new Snaps!, USER NAME1, USER NAME2,..., USER NAMEX]
+            String[] test = notifText.get(0).split(" ");
+            if(test[0].matches("^[0-9]*$")){ // Checks to see if the first word is a number
+                count = Integer.parseInt(test[0]);
+                for(int i = 1; i < notifText.size(); i++){
+                    names += notifText.get(i);
+                }
+            }
+            else{ // Its actually just one
+                count = 1;
+                test = notifText.get(1).split(" ");
+                for(int i = 3; i < test.length; i++){
+                    names += test[i] + " ";
+                }
+            }
+            MessageManager manager = MessageManager.getInstance();
+            if (manager != null) {
+                if (manager.getReceiver()!=null){
+                    manager.notifyListener(count, names);
+                }
             }
         }
-
     }
 
     /**
@@ -64,12 +75,22 @@ public class SnapNotificationService extends AccessibilityService{
     * */
     public static ArrayList<String> extractor(Notification notification) {
         ArrayList<String> notifText = new ArrayList<String>();
-        RemoteViews views = notification.contentView;
+        RemoteViews views;
+        /**
+         * Same as above null check, prevents widget from crashing on feed clear or Story deletion,
+         * possibly some other ones as well
+         * */
+        try{
+            views = notification.contentView;
+        }catch(NullPointerException n){
+            n.printStackTrace();
+            return null;
+        }
+
         @SuppressWarnings("rawtypes")
         Class secretClass = views.getClass();
 
         try {
-
             Field outerFields[] = secretClass.getDeclaredFields();
             for (int i = 0; i < outerFields.length; i++) {
 
@@ -81,15 +102,13 @@ public class SnapNotificationService extends AccessibilityService{
                 @SuppressWarnings("unchecked")
                 ArrayList<Object> actions = (ArrayList<Object>) outerFields[i].get(views);
                 for (Object action : actions) {
-
                     Field innerFields[] = action.getClass().getDeclaredFields();
-
                     Object value = null;
                     Integer type = null;
                     @SuppressWarnings("unused")
                     Integer viewId = null;
-                    for (Field field : innerFields) {
 
+                    for (Field field : innerFields) {
                         field.setAccessible(true);
                         if (field.getName().equals("value")) {
                             value = field.get(action);
@@ -99,14 +118,12 @@ public class SnapNotificationService extends AccessibilityService{
                             viewId = field.getInt(action);
                         }
                     }
-
                     if (type != null && (type == 9 || type == 10) && value != null) {
                         if (!notifText.contains(value.toString()))
                             notifText.add(value.toString());
                     }
                 }
             }
-
         } catch (Exception e) {
             e.printStackTrace();
         }

@@ -27,10 +27,12 @@ public class SnapchatExtension extends DashClockExtension{
             manager.setReceiver(receiver);
         }
         // Checks and updates the widget every time screen turns on
+        setUpdateWhenScreenOn(true);
     }
 
     /**
-     * Will become replaced most likely, but used for clarity in other files. Updates the message (i.e. changes the notification)
+     * Updates the message (i.e. changes the notification)
+     * Method became useful once expandedBody (extraMessage) was added
      */
     public void updateMessage(String extra) {
         extraMessage = extra;
@@ -49,12 +51,12 @@ public class SnapchatExtension extends DashClockExtension{
 
             int count= manager.getCount();
             if(count > 0){
-                String message = count == 1 ? (count + " unseen snap"):(count + " unseen snaps");
+                String message = count == 1 ? (count + " new snap"):(count + " new snaps");
                 ExtensionData data =
                         new ExtensionData().visible(true)
                                 .icon(R.drawable.ic_notification)
                                 .status("" + count)
-                                .expandedBody(extraMessage)
+                                .expandedBody("From " + extraMessage)
                                 .expandedTitle(message);
                 if (intent!=null)
                     data.clickIntent(intent);

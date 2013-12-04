@@ -37,9 +37,9 @@ public class MessageManager {
     /**
      * Notify the extension to update itself on new snap
      */
-    public void notifyListener(String message) {
+    public void notifyListener(int notifCount, String message) {
         if (ext != null){
-            count++;
+            count = notifCount;
             ext.updateMessage(message);
         }
     }
