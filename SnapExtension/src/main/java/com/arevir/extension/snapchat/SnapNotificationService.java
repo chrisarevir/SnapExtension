@@ -17,8 +17,6 @@ public class SnapNotificationService extends AccessibilityService{
     @Override
     public void onAccessibilityEvent(AccessibilityEvent event) {
         if(event.getEventType() == AccessibilityEvent.TYPE_NOTIFICATION_STATE_CHANGED){
-            System.out.println("Notification event state changed");
-
             // Get all the pertinent information from notification
             notifText = extractor((Notification) event.getParcelableData());
             String names = "";
@@ -27,12 +25,6 @@ public class SnapNotificationService extends AccessibilityService{
             // Had to include this check because the widget would crash when either the
             // feed was cleared or when a Story was deleted
             if(notifText == null){
-                MessageManager manager = MessageManager.getInstance();
-                if (manager != null) {
-                    if (manager.getReceiver()!=null){
-                        manager.notifyListener(0, names);
-                    }
-                }
                 return;
             }
 

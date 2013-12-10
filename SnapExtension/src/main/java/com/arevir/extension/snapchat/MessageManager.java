@@ -6,6 +6,7 @@ public class MessageManager {
     private static MessageManager instance;
     private MessageReceiver receiver;
     private int count;
+    private String message;
 
     /**
      * Set receiver
@@ -37,10 +38,10 @@ public class MessageManager {
     /**
      * Notify the extension to update itself on new snap
      */
-    public void notifyListener(int notifCount, String message) {
+    public void notifyListener(int notifCount, String notifMessage) {
         if (ext != null){
             count = notifCount;
-            ext.updateMessage(message);
+            message = notifMessage;
         }
     }
 
@@ -57,6 +58,12 @@ public class MessageManager {
     public int getCount() {
         return count;
     }
+
+
+    /**
+     * @return      the string of people who have sent you a snap
+     */
+    public String getMessage() { return message; }
 
     /**
      * @return      the receiver for this service

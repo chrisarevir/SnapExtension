@@ -13,8 +13,7 @@ import com.google.android.apps.dashclock.api.ExtensionData;
 public class SnapchatExtension extends DashClockExtension{
     private MessageManager  manager;
     private MessageReceiver receiver;
-    String extraMessage;
-    //private String names;
+
     /**
      * Standard initialization as well as initializing the receiver if needed
      */
@@ -34,8 +33,7 @@ public class SnapchatExtension extends DashClockExtension{
      * Updates the message (i.e. changes the notification)
      * Method became useful once expandedBody (extraMessage) was added
      */
-    public void updateMessage(String extra) {
-        extraMessage = extra;
+    public void updateMessage() {
         onUpdateData(UPDATE_REASON_CONTENT_CHANGED);
     }
 
@@ -48,7 +46,6 @@ public class SnapchatExtension extends DashClockExtension{
         if (manager !=null){
             PackageManager pm = getPackageManager();
             Intent intent=pm.getLaunchIntentForPackage("com.snapchat.android");
-
             int count= manager.getCount();
             if(count > 0){
                 String message = count == 1 ? (count + " new snap"):(count + " new snaps");
@@ -56,7 +53,7 @@ public class SnapchatExtension extends DashClockExtension{
                         new ExtensionData().visible(true)
                                 .icon(R.drawable.ic_notification)
                                 .status("" + count)
-                                .expandedBody("From " + extraMessage)
+                                .expandedBody("From " + manager.getMessage())
                                 .expandedTitle(message);
                 if (intent!=null)
                     data.clickIntent(intent);
